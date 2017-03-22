@@ -3,6 +3,7 @@ import React, {Children, Component} from 'react'
 
 import defaultStyle from './default-style'
 import type {Node} from './types'
+import store from './store'
 
 const swatchStyle = {
     display: 'inline-block',
@@ -95,6 +96,61 @@ class SmallButton extends Component {
     }
 }
 
+// TODO create different specialized editors for colors, dropdowns, compound values, etc.
+class Editor extends Component {
+    props: {
+        children?: Children,
+        name: string,
+        value: any,
+    }
+
+    dirty: boolean
+    initialValue: string
+    node: HTMLElement
+
+    handleBlur = () => {
+        // TODO(kevinb) validate before dispatch so we can reset the value
+        if (this.dirty) {
+            store.dispatch({
+                type: 'UPDATE',
+                name: this.props.name,
+                value: this.node.innerText,
+            });
+        }
+
+        this.dirty = false
+    }
+
+    handleFocus = () => {
+        this.dirty = false
+        if (this.node) {
+            this.initialValue = this.node.innerText || ''
+        }
+    }
+
+    handleKeyPress = (e: KeyboardEvent) => {
+        console.log(e.charCode);
+        console.log(e);
+        this.dirty = true
+    }
+
+    render() {
+        const style = {
+            width: '100%',
+            whiteSpace: 'nowrap',
+        }
+        return <div
+            contentEditable={true}
+            style={style}
+            ref={node => this.node = node}
+            onBlur={this.handleBlur}
+            onKeyPress={this.handleKeyPress}
+        >
+            {this.props.children}
+        </div>;
+    }
+}
+
 export default class Inspector extends Component {
     props: {
         data: Node,
@@ -102,7 +158,9 @@ export default class Inspector extends Component {
 
     formatValue(key: string, value: any) {
         if (typeof value === 'number') {
-            return `${value}px`;  // TODO(kevinb) handle more units
+            // TODO(kevinb) handle more units
+            const str = `${value}px`;
+            return <Editor name={key} value={str}>{str}</Editor>;
         } else if (key in values) {
             return <select>
                 {values[key].map((value) => <option key={value} value={value}>
@@ -110,7 +168,7 @@ export default class Inspector extends Component {
                 </option>)}
             </select>;
         } else {
-            return value;
+            return <Editor name={key} value={value}>{value}</Editor>;
         }
     }
 

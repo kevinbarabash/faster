@@ -14,6 +14,7 @@ class App extends Component {
 
   render() {
     const {data} = this.props;
+    console.log(data);
 
     return <div>
       <h1>faster test page</h1>

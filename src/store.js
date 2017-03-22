@@ -82,8 +82,36 @@ const initialState = {
 
 // const names = ['tabby', 'caleco', 'alley', 'blue', 'siamese'];
 
+
+const lengthRegex = /(em|ex|%|px|cm|mm|in|pt|pc)$/
+const colorRegex = /[Cc]olor/
+
+const validate = (name, value) => {
+  if (colorRegex.test(name)) {
+    return true;
+  } else {
+    return lengthRegex.test(value);
+  }
+}
+
 const reducer = (state, action) => {
-    return state;
+  console.log(action);
+  switch (action.type) {
+    case 'UPDATE':
+      if (validate(action.name, action.value)) {
+        return {
+          ...state,
+          style: {
+            ...state.style,
+            [action.name]: action.value,
+          },
+        };
+      } else {
+        return state;
+      }
+    default:
+      return state;
+  }
 }
 
 export default createStore(reducer, initialState)
