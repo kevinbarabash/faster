@@ -18,7 +18,7 @@ class App extends Component {
 
     return <div>
       <h1>faster test page</h1>
-      <div style={{display: 'flex', flexDirection: 'row'}}>
+      <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
         <Inspector data={data}/>
         <Renderer data={data}/>
       </div>

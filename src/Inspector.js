@@ -124,12 +124,17 @@ class Editor extends Component {
             const value = this.node.innerText || '';
             const name = this.props.name;
 
-            if (validate(name, value)) {
+            if (value === '') {
+                store.dispatch({
+                    type: 'DELETE',
+                    name: name,
+                })
+            } else if (validate(name, value)) {
                 store.dispatch({
                     type: 'UPDATE',
                     name: name,
                     value: value,
-                });
+                })
             } else {
                 this.node.innerText = this.initialValue;
             }
@@ -145,8 +150,22 @@ class Editor extends Component {
         }
     }
 
-    handleKeyPress = (e: KeyboardEvent) => {
+    handleChange = () => {
         this.dirty = true
+        const value = this.node.innerText || ''
+        const name = this.props.name
+
+        if (validate(name, value)) {
+            store.dispatch({
+                type: 'UPDATE',
+                name: name,
+                value: value,
+            });
+        }
+    }
+
+    shouldComponentUpdate(newProps) {
+        return newProps.value !== (this.node.innerText || '');
     }
 
     render() {
@@ -162,8 +181,8 @@ class Editor extends Component {
             style={style}
             ref={node => this.node = node}
             onBlur={this.handleBlur}
+            onInput={this.handleChange}
             onFocus={this.handleFocus}
-            onKeyPress={this.handleKeyPress}
         >
             {this.props.children}
         </div>;

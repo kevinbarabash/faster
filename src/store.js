@@ -93,6 +93,14 @@ const reducer = (state, action) => {
           [action.name]: action.value,
         },
       }
+    case 'DELETE':
+      return {
+        ...state,
+        style: {
+          ...state.style,
+          [action.name]: undefined,
+        },
+      }
     default:
       return state;
   }
