@@ -96,6 +96,17 @@ class SmallButton extends Component {
     }
 }
 
+const lengthRegex = /(em|ex|%|px|cm|mm|in|pt|pc)$/
+const colorRegex = /color/i
+
+const validate = (name, value: string) => {
+    if (colorRegex.test(name)) {
+        return true;
+    } else {
+        return lengthRegex.test(value);
+    }
+}
+
 // TODO create different specialized editors for colors, dropdowns, compound values, etc.
 class Editor extends Component {
     props: {
@@ -109,13 +120,19 @@ class Editor extends Component {
     node: HTMLElement
 
     handleBlur = () => {
-        // TODO(kevinb) validate before dispatch so we can reset the value
         if (this.dirty) {
-            store.dispatch({
-                type: 'UPDATE',
-                name: this.props.name,
-                value: this.node.innerText,
-            });
+            const value = this.node.innerText || '';
+            const name = this.props.name;
+
+            if (validate(name, value)) {
+                store.dispatch({
+                    type: 'UPDATE',
+                    name: name,
+                    value: value,
+                });
+            } else {
+                this.node.innerText = this.initialValue;
+            }
         }
 
         this.dirty = false
@@ -129,21 +146,23 @@ class Editor extends Component {
     }
 
     handleKeyPress = (e: KeyboardEvent) => {
-        console.log(e.charCode);
-        console.log(e);
         this.dirty = true
     }
 
     render() {
+        const isColor = /color/i.test(this.props.name)
+
         const style = {
-            width: '100%',
             whiteSpace: 'nowrap',
+            paddingLeft: isColor ? 20 : 0,
         }
+
         return <div
             contentEditable={true}
             style={style}
             ref={node => this.node = node}
             onBlur={this.handleBlur}
+            onFocus={this.handleFocus}
             onKeyPress={this.handleKeyPress}
         >
             {this.props.children}
@@ -196,8 +215,8 @@ export default class Inspector extends Component {
 
                         return <tr key={key} style={{ color: defaultStyle[key] !== value ? 'black' : '#AAA' }}>
                             <td style={{ fontFamily: 'monospace', paddingRight: 16, border: 'solid 1px #CCC', padding: '2px 4px'}}>{key}</td>
-                            <td style={{ alignItems: 'center', fontFamily: 'monospace', border: 'solid 1px #CCC', padding: '2px 4px'}}>
-                                {isColor && <Swatch color={value} />}
+                            <td style={{ alignItems: 'center', position: 'relative', fontFamily: 'monospace', border: 'solid 1px #CCC', padding: '2px 4px'}}>
+                                {isColor && <span style={{position: 'absolute', top: 0, left: 8}}> <Swatch color={value} /></span>}
                                 {this.formatValue(key, value)}
                             </td>
                         </tr>
