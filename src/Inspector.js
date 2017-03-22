@@ -147,6 +147,12 @@ class Editor extends Component {
         this.dirty = false
         if (this.node) {
             this.initialValue = this.node.innerText || ''
+
+            var selection = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(this.node);
+            selection.removeAllRanges();
+            selection.addRange(range);
         }
     }
 
